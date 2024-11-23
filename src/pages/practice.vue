@@ -83,18 +83,10 @@ export default defineComponent({
         };
     },
     methods: {
-        loadPracticeCards(jsonData: string) {
-            try {
-                console.log(jsonData);
-                const data = JSON.parse(jsonData);
-                console.log(data);
-                return data;
-            } catch (error) {
-                console.error("Invalid JSON data", error);
-            }
-        },
         async getProblems() {
-            await axios.get('http://127.0.0.1:8000/api/get_problems?page=1').then(response => {
+            const apiUrl = 'http://192.168.1.107:8000';
+            await axios.get(`${apiUrl}/api/get_problems?page=1`).then(response => {
+                console.log(response.data.datas)
                 this.practiceCards = response.data.datas;
             }).catch(error => { console.error(error) });
         }

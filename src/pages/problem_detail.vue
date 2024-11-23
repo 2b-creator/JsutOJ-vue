@@ -1,4 +1,5 @@
 <template transition="fade-transition">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css">
     <div class="border-thin">
         <v-sheet :elevation="9">
             <v-container height="60">
@@ -32,9 +33,80 @@
                         </router-link>
                     </v-row>
                     <v-container class="overflow-auto">
-                        <v-row class="ma-3">
-                            <h1 class="ma-3">{{ problemAttribute.title }}</h1>
-                        </v-row>
+                        <v-container>
+                            <v-row>
+                                <v-col>
+                                    <v-card ref="leftCard">
+                                        <v-container>
+                                            <v-card-title>{{ problemAttribute.title }}</v-card-title>
+                                            <v-card-text>
+                                                <MarkdownMath v-if="problemAttribute.description"
+                                                    markdownContent="## 题目描述" />
+                                            </v-card-text>
+                                            <v-card-text>
+                                                <MarkdownMath v-if="problemAttribute.description"
+                                                    :markdownContent="problemAttribute.description.toString()" />
+                                            </v-card-text>
+                                            <v-card-text>
+                                                <MarkdownMath v-if="problemAttribute.description"
+                                                    markdownContent="## 输入描述" />
+                                            </v-card-text>
+                                            <v-card-text>
+                                                <MarkdownMath v-if="problemAttribute.description"
+                                                    :markdownContent="problemAttribute.input_description.toString()" />
+                                            </v-card-text>
+                                            <v-card-text>
+                                                <MarkdownMath v-if="problemAttribute.description"
+                                                    markdownContent="## 输出描述" />
+                                            </v-card-text>
+                                            <v-card-text>
+                                                <MarkdownMath v-if="problemAttribute.description"
+                                                    :markdownContent="problemAttribute.output_description.toString()" />
+                                            </v-card-text>
+                                        </v-container>
+                                        <v-container v-if="problemAttribute.description">
+                                            <v-row>
+                                                <v-col>
+                                                    <v-card-text>
+                                                        <MarkdownMath markdownContent="## 输入样例" />
+                                                        <highlightjs id="inputSample" language='plaintext'
+                                                            :code="problemAttribute.sample_input" />
+                                                        <v-btn class="btn" data-clipboard-action="copy"
+                                                            data-clipboard-target="#inputSample"
+                                                            @click="copyAction">复制样例</v-btn>
+                                                    </v-card-text>
+                                                </v-col>
+                                                <v-col>
+                                                    <v-card-text>
+                                                        <MarkdownMath markdownContent="## 输出样例" />
+                                                        <highlightjs language="plaintext"
+                                                            :code="problemAttribute.sample_output" />
+                                                    </v-card-text>
+                                                </v-col>
+                                            </v-row>
+                                        </v-container>
+
+                                    </v-card>
+                                </v-col>
+                                <v-col>
+                                    <v-card :height="leftHeight">
+                                        <v-card-title>代码编辑区</v-card-title>
+                                        <v-card-text>
+                                            <v-container>
+                                                <MonacoEditorComp style="height: 500px;" anguage="cpp">
+                                                </MonacoEditorComp>
+                                            </v-container>
+                                            <v-row justify="end">
+                                                <v-btn>
+                                                    提交
+                                                </v-btn>
+                                            </v-row>
+
+                                        </v-card-text>
+                                    </v-card>
+                                </v-col>
+                            </v-row>
+                        </v-container>
 
                     </v-container>
                 </v-row>
@@ -42,7 +114,7 @@
         </v-sheet>
     </div>
 </template>
-<style scoped>
+<style>
 .router-link-active {
     text-decoration: none;
     color: white;
@@ -56,7 +128,11 @@ a {
 
 <script lang="ts">
 import axios from 'axios';
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
+import 'highlight.js/styles/monokai.css';
+import MarkdownMath from './../components/MarkdownMath.vue';
+import ClipboardJS from 'clipboard'; // 导入 clipboard.js
+import hljsVuePlugin from "@highlightjs/vue-plugin";
 
 interface ProblemAttribute {
     title: string;
@@ -72,14 +148,32 @@ interface ProblemAttribute {
 }
 
 export default defineComponent({
+    components: {
+        MarkdownMath, highlightjs: hljsVuePlugin.component,
+    },
     beforeMount() {
         this.getProblems();
+
+    },
+    mounted() {
+        this.getHeight();
+        // this.$nextTick(
+        //     () => {
+        //         this.getHeight();
+        //     }
+        // )
+    },
+    created() {
+        window.addEventListener('resize', this.getHeight)
     },
     data() {
         return {
             // 定义数据的类型
             problemAttribute: {} as ProblemAttribute,
             page: 0 as number,
+            markdownText: '' as String,
+            clickText: '' as String,
+            leftHeight: 0 as number,
         };
     },
     methods: {
@@ -93,11 +187,39 @@ export default defineComponent({
                 console.error("Invalid JSON data", error);
             }
         },
-        async getProblems() {
-            await axios.get('http://127.0.0.1:8000/api/get_problem_detail?id=' + this.$route.query.id).then(response => {
+        getProblems() {
+            const apiUrl = 'http://192.168.1.107:8000';
+            axios.get(`${apiUrl}/api/get_problem_detail?id=` + this.$route.query.id).then(response => {
                 this.problemAttribute = response.data.data;
-                console.log(this.problemAttribute)
+                console.log(this.problemAttribute);
             }).catch(error => { console.error(error) });
+        },
+        copyAction() {
+            var clipboard = new ClipboardJS('.btn');
+
+            //5. 复制成功的响应事件【按F12控制台可见】
+            clipboard.on('success', function (e) {
+                console.log(e);
+                //打印动作信息（copy或者cut）
+                console.info('Action:', e.action);
+                //打印复制的文本
+                console.info('Text:', e.text);
+                //打印trigger
+                console.info('Trigger:', e.trigger);
+            });
+
+            //6. 复制失败的响应事件
+            clipboard.on('error', function (e) {
+                console.log(e);
+                console.error('Action:', e.action);
+                console.error('Trigger:', e.trigger);
+            });
+
+        },
+        getHeight() {
+            const element = this.$refs.leftCard as HTMLElement;
+            const height = element.offsetHeight;
+            this.leftHeight = height;
         }
     }
 });
