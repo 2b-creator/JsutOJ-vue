@@ -25,11 +25,9 @@
               <v-btn variant="text" density="default">标签</v-btn>
             </v-col>
 
-            <router-link to="/login">
-              <v-col cols="auto">
-                <v-btn variant="text" density="default">登录</v-btn>
-              </v-col>
-            </router-link>
+            <v-col cols="auto">
+              <v-btn @click="setJumpRouter" variant="text" density="default">{{ loginStatus }}</v-btn>
+            </v-col>
           </v-row>
           <v-container class="overflow-auto">
             <v-row class="ma-3">
@@ -66,6 +64,46 @@ a {
 }
 </style>
 
-<script lang="ts" setup>
+<script lang="ts">
+import router from '@/router';
+import axios from 'axios';
 
+let loginStatus = '登录';
+let routeDirect = '/login';
+axios.interceptors.request.use(
+  config => {
+    // 从localStorage获取token
+    const token = localStorage.getItem('access_token');
+
+    if (token) {
+      // 将token添加到请求头
+      config.headers['access-token'] = `${token}`;
+      loginStatus = '个人';
+    }
+
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+export default {
+  beforeMount() {
+    const token = localStorage.getItem('access_token');
+
+    if (token) {
+      this.loginStatus = '个人';
+      this.routeDirect = '/';
+    }
+  },
+  data: () => ({
+    loginStatus: '登录' as String,
+    routeDirect: '/login' as String,
+  }),
+  methods: {
+    setJumpRouter() {
+      router.push({ path: routeDirect })
+    }
+  }
+}
 </script>

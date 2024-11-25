@@ -26,11 +26,9 @@
                             <v-btn variant="text" density="default">标签</v-btn>
                         </v-col>
 
-                        <router-link to="/login">
-                            <v-col cols="auto">
-                                <v-btn variant="text" density="default">登录</v-btn>
-                            </v-col>
-                        </router-link>
+                        <v-col cols="auto">
+                            <v-btn @click="setJumpRouter" variant="text" density="default">{{ loginStatus }}</v-btn>
+                        </v-col>
                     </v-row>
                     <v-container class="overflow-auto">
                         <v-container>
@@ -93,11 +91,12 @@
                                         <v-card-title>代码编辑区</v-card-title>
                                         <v-card-text>
                                             <v-container>
-                                                <MonacoEditorComp style="height: 500px;" anguage="cpp">
+                                                <MonacoEditorComp ref="monacoEditor" @update:modelValue="handleEditorChange" v-model="editorText" name="monacoEditor"
+                                                    style="height: 500px;" anguage="cpp">
                                                 </MonacoEditorComp>
                                             </v-container>
                                             <v-row justify="end">
-                                                <v-btn>
+                                                <v-btn @click="submitCodes">
                                                     提交
                                                 </v-btn>
                                             </v-row>
@@ -133,7 +132,26 @@ import 'highlight.js/styles/monokai.css';
 import MarkdownMath from './../components/MarkdownMath.vue';
 import ClipboardJS from 'clipboard'; // 导入 clipboard.js
 import hljsVuePlugin from "@highlightjs/vue-plugin";
+import router from '@/router';
+import MonacoEditorComp from '@/components/MonacoEditorComp.vue';
+let loginStatus = '登录';
+let routeDirect = '/login';
+axios.interceptors.request.use(
+    config => {
+        // 从localStorage获取token
+        const token = localStorage.getItem('access_token');
 
+        if (token) {
+            // 将token添加到请求头
+            config.headers['access-token'] = `${token}`;
+        }
+
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
 interface ProblemAttribute {
     title: string;
     description: string;
@@ -149,11 +167,16 @@ interface ProblemAttribute {
 
 export default defineComponent({
     components: {
-        MarkdownMath, highlightjs: hljsVuePlugin.component,
+        MarkdownMath, highlightjs: hljsVuePlugin.component, MonacoEditorComp
     },
     beforeMount() {
         this.getProblems();
+        const token = localStorage.getItem('access_token');
 
+        if (token) {
+            this.loginStatus = '个人';
+            this.routeDirect = '/';
+        }
     },
     mounted() {
         this.getHeight();
@@ -166,6 +189,28 @@ export default defineComponent({
     created() {
         window.addEventListener('resize', this.getHeight)
     },
+    setup() {
+        const editorText = ref('#include <iostream>\nusing namespace std;\nint main()\n{\n    // your code here\n    return 0;\n}') // 存储编辑器的文本内容
+        const monacoEditor = ref()
+
+        // 获取编辑器的内容
+        const getEditorContent = () => {
+            const value = editorText.value
+            console.log('当前编辑器的文本内容：', value)
+        }
+
+        // 监听文本更新
+        const handleEditorChange = (newValue: string) => {
+            editorText.value = newValue
+        }
+
+        return {
+            editorText,
+            monacoEditor,
+            getEditorContent,
+            handleEditorChange
+        }
+    },
     data() {
         return {
             // 定义数据的类型
@@ -174,6 +219,8 @@ export default defineComponent({
             markdownText: '' as String,
             clickText: '' as String,
             leftHeight: 0 as number,
+            loginStatus: '登录' as String,
+            routeDirect: '/login' as String,
         };
     },
     methods: {
@@ -220,6 +267,18 @@ export default defineComponent({
             const element = this.$refs.leftCard as HTMLElement;
             const height = element.offsetHeight;
             this.leftHeight = height;
+        },
+        setJumpRouter() {
+            router.push({ path: routeDirect })
+        },
+        submitCodes() {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                router.push({ path: '/check_result', query: { id: this.$route.query.id, codes: this.editorText } });
+            }
+            else {
+                router.push({ path: '/login' });
+            }
         }
     }
 });
