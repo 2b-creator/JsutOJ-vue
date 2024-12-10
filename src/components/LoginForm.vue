@@ -8,7 +8,7 @@
             <br>
             <div class="text-subtitle-1 text-medium-emphasis">用户名</div>
 
-            <v-text-field density="compact" placeholder="请输入用户名" prepend-inner-icon="mdi-email-outline"
+            <v-text-field density="compact" placeholder="请输入用户名" prepend-inner-icon="mdi-account"
                 v-model="username" variant="outlined"></v-text-field>
 
             <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
@@ -34,7 +34,7 @@
             </v-btn>
 
             <v-card-text class="text-center">
-                <a class="text-blue text-decoration-none" href="#" rel="noopener noreferrer" target="_blank">
+                <a class="text-blue text-decoration-none" href="/register" rel="noopener noreferrer" target="_blank">
                     注册<v-icon icon="mdi-chevron-right"></v-icon>
                 </a>
             </v-card-text>
@@ -51,7 +51,7 @@ interface LoginResponse {
 let sec = 0;
 const login = async (username: string, password_hash: string) => {
     try {
-        const apiUrl = 'http://192.168.1.107:8000';
+        const apiUrl = 'http://192.168.1.105:8000';
         const resp = await axios.post<LoginResponse>(`${apiUrl}/api/login`, { username, password_hash: password_hash });
         const accessToken = resp.data.access_token;
         console.log(accessToken);

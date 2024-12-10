@@ -94,7 +94,7 @@ export default defineComponent(
                     language: 'cpp'
                 }
                 console.log(data);
-                const apiUrl = 'http://192.168.1.107:8000';
+                const apiUrl = 'http://192.168.1.105:8000';
                 axios.post(`${apiUrl}/api/submit`, data, {
                     headers: {
                         'Content-Type': 'application/json',

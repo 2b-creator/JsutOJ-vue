@@ -12,6 +12,7 @@ declare module 'vue' {
     MarkdownMath: typeof import('./components/MarkdownMath.vue')['default']
     MonacoEditorComp: typeof import('./components/MonacoEditorComp.vue')['default']
     MonacoEditorVue: typeof import('./components/MonacoEditorComp.vue')['default']
+    RegisterForm: typeof import('./components/RegisterForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

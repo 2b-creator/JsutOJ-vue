@@ -110,7 +110,7 @@ export default defineComponent({
     },
     methods: {
         async getProblems() {
-            const apiUrl = 'http://192.168.1.107:8000';
+            const apiUrl = 'http://192.168.1.105:8000';
             await axios.get(`${apiUrl}/api/get_problems?page=1`).then(response => {
                 console.log(response.data.datas)
                 this.practiceCards = response.data.datas;

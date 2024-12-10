@@ -235,7 +235,7 @@ export default defineComponent({
             }
         },
         getProblems() {
-            const apiUrl = 'http://192.168.1.107:8000';
+            const apiUrl = 'http://192.168.1.105:8000';
             axios.get(`${apiUrl}/api/get_problem_detail?id=` + this.$route.query.id).then(response => {
                 this.problemAttribute = response.data.data;
                 console.log(this.problemAttribute);
