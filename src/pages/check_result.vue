@@ -31,13 +31,37 @@
                         </v-col>
                     </v-row>
                     <v-container class="overflow-auto">
+                        <div class="d-flex flex-column ma-3">
+
+                            <h2 class="ma-3">判题结果</h2>
+                            <v-card class="ma-3">
+                                <v-card-item>
+                                    <div v-if="statusData" class="ma-1">
+                                        <v-chip class="ma-1" v-for="item in statusData" :color="item.color">
+                                            {{ item.code }}
+                                        </v-chip>
+                                    </div>
+                                </v-card-item>
+                            </v-card>
+
+                        </div>
                     </v-container>
                 </v-row>
             </v-container>
         </v-sheet>
     </div>
 </template>
+<style>
+.router-link-active {
+    text-decoration: none;
+    color: white;
+}
 
+a {
+    text-decoration: none;
+    color: white;
+}
+</style>
 <script lang="ts">
 import axios from 'axios';
 import { defineComponent, ref } from 'vue';
@@ -65,6 +89,12 @@ interface PostData {
     code: string,
     language: string,
 }
+interface StatusData {
+    status: string,
+    test_id: string,
+    color: string,
+    code: string,
+}
 
 export default defineComponent(
     {
@@ -79,6 +109,7 @@ export default defineComponent(
         },
         data() {
             return {
+                statusData: [] as StatusData[],
                 loginStatus: '登录' as String,
                 routeDirect: '/login' as String,
             }
@@ -99,11 +130,12 @@ export default defineComponent(
                     headers: {
                         'Content-Type': 'application/json',
                         'access-token': localStorage.getItem('access_token'),
-                        
+
                     }
                 }).then(
                     response => {
-                        console.log('Response:', response.data);
+                        console.log('Response:', response.data.output);
+                        this.statusData = response.data.output.results;
                     }
                 )
             }
