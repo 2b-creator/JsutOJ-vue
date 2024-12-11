@@ -18,7 +18,7 @@
 
             <div class="text-subtitle-1 text-medium-emphasis">邮箱</div>
 
-            <v-text-field density="compact" placeholder="请输入邮箱" prepend-inner-icon="mdi-email" v-model="stu_id"
+            <v-text-field density="compact" v-model="email" placeholder="请输入邮箱" prepend-inner-icon="mdi-email"
                 variant="outlined"></v-text-field>
 
             <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
@@ -43,7 +43,7 @@
                 </v-card-text>
             </v-card> -->
 
-            <v-btn @click="" class="mb-8" color="blue" size="large" variant="tonal" block>
+            <v-btn @click="registerNewUser" class="mb-8" color="blue" size="large" variant="tonal" block>
                 注册
             </v-btn>
 
@@ -65,6 +65,27 @@ function md5_encrypt(input_strings: string): string {
     // 返回加密后的十六进制字符串
     return hash.toString(CryptoJS.enc.Hex);
 }
+let flag = 0;
+interface RegisterResponse {
+    access_token: string
+}
+
+const registerPost = async (username: string, stu_id: string, password_hash_cm: string, email_cm: string) => {
+    try {
+        const apiUrl = 'http://192.168.1.105:8000';
+        const resp = await axios.post<RegisterResponse>(`${apiUrl}/api/register`, { username, password_hash_cm, email_cm, stu_id });
+        const accessToken = resp.data.access_token;
+        console.log(accessToken);
+        localStorage.setItem('access_token', accessToken);
+    } catch (error) {
+        flag = 1;
+    } finally {
+        if (flag) {
+
+        }
+    }
+}
+
 axios.interceptors.request.use(
     config => {
         // 从localStorage获取token
@@ -85,15 +106,16 @@ export default {
     data: () => (
         {
             visible: false,
-            username: "" as String,
-            password: "" as String,
-            passwordConfirm: "" as String,
-            stu_id: "" as String,
+            email: "" as string,
+            username: "" as string,
+            password: "" as string,
+            passwordConfirm: "" as string,
+            stu_id: "" as string,
         }
     ),
     methods: {
         registerNewUser() {
-
+            registerPost(this.username, this.stu_id, md5_encrypt(this.password), this.email);
         }
     }
 }
