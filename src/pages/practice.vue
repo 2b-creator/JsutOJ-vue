@@ -86,7 +86,7 @@ axios.interceptors.request.use(
 interface PracticeCard {
     id: number;
     title: string;
-    tag: string;
+    tag: string[];
 }
 
 export default defineComponent({

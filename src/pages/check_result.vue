@@ -95,7 +95,9 @@ interface StatusData {
     color: string,
     code: string,
 }
-
+function isString(value: any): boolean {
+    return value instanceof String;
+}
 export default defineComponent(
     {
         beforeMount() {
@@ -135,7 +137,12 @@ export default defineComponent(
                 }).then(
                     response => {
                         console.log('Response:', response.data.output);
-                        this.statusData = response.data.output.results;
+                        if (isString(response.data.output.results)) {
+                            this.statusData = response.data.output.results;
+                        }
+                        else {
+                            this.statusData = response.data.output;
+                        }
                     }
                 )
             }
