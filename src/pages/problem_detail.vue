@@ -63,7 +63,7 @@
                                             </v-card-text>
                                         </v-container>
                                         <v-container v-if="problemAttribute.description">
-                                            <v-row>
+                                            <!-- <v-row>
                                                 <v-col>
                                                     <v-card-text>
                                                         <MarkdownMath markdownContent="## 输入样例" />
@@ -81,7 +81,7 @@
                                                             :code="problemAttribute.sample_output" />
                                                     </v-card-text>
                                                 </v-col>
-                                            </v-row>
+                                            </v-row> -->
                                         </v-container>
 
                                     </v-card>
@@ -157,8 +157,6 @@ interface ProblemAttribute {
     description: string;
     input_description: string;
     output_description: string;
-    sample_input: string;
-    sample_output: string;
     difficulty: number;
     time_limit: number;
     memory_limit: number;
